@@ -1,0 +1,19 @@
+﻿@model VoituresComparisonVM
+
+<table>
+	@foreach (var item in Model.VoituresMarque1)
+	{
+		<tr>
+			<td>@item.Model</td>
+		</tr>
+	}
+</table>
+
+<table>
+	@foreach (var item in Model.VoituresMarque2)
+	{
+		<tr>
+			<td>@item.Model</td>
+		</tr>
+	}
+</table>

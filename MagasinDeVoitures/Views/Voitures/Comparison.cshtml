@@ -1,0 +1,19 @@
+﻿@model IList<Voiture>
+
+<table>
+	@foreach (var item in Model.Where(v => v.Make == "Honda"))
+	{
+		<tr>
+			<td>@item.Model</td>
+		</tr>
+	}
+</table>
+
+<table>
+	@foreach (var item in Model.Where(v => v.Make == "Tesla"))
+	{
+		<tr>
+			<td>@item.Model</td>
+		</tr>
+	}
+</table>

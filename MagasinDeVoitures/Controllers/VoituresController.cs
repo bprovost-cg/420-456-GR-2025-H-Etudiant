@@ -1,4 +1,5 @@
-﻿using MagasinDeVoitures.Models;
+﻿using System.Drawing;
+using MagasinDeVoitures.Models;
 using MagasinDeVoitures.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ namespace MagasinDeVoitures.Controllers
                 Voitures = Voitures
             };
             return View(vm);
+
             // Retours équivalents
             return View("Index", vm);
             return View(nameof(Index), vm);
@@ -44,6 +46,26 @@ namespace MagasinDeVoitures.Controllers
             };
 
             return View(vm);
+        }
+
+
+        public IActionResult Comparison(string make1, string make2)
+        {
+            IList<Voiture> voituresMarque1 = Voitures.Where(v => v.Make == make1).ToArray();
+            IList<Voiture> voituresMarque2 = Voitures.Where(v => v.Make == make2).ToArray();
+
+            var vm = new VoituresComparisonVM()
+            {
+                Marque1 = make1,
+                VoituresMarque1 = voituresMarque1,
+                Marque2 = make2,
+                VoituresMarque2 = voituresMarque2,
+            };
+
+            return View("Comparison2", vm);
+
+            IList<Voiture> voitures = Voitures.Where(v => v.Make == make1 || v.Make == make2).ToArray();
+            return View(voitures);
         }
     }
 }
