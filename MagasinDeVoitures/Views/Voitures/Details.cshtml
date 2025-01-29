@@ -1,0 +1,21 @@
+﻿@model MagasinDeVoitures.ViewModels.VoituresDetailsViewModel
+
+@{
+	ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+	<h4>VoituresDetailsViewModel</h4>
+	<hr />
+	<dl class="row">
+		<dt>@Model.Voiture.Make</dt>
+		<dt>@Model.Voiture.Model</dt>
+		<dt>@Model.Voiture.Year</dt>
+		<dt>@Model.Voiture.Edition</dt>
+	</dl>
+</div>
+<div>
+	<a asp-action="Index">Back to List</a>
+</div>
