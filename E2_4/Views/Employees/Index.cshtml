@@ -1,0 +1,7 @@
+﻿@model EmployeesIndexVM
+<h2 class="@(Model.Employees.Count() >= 5 ? "alert alert-success" : "")">Liste des employés</h2>
+
+@foreach (var employee in @Model.Employees)
+{
+	await Html.RenderPartialAsync("_EmployeeInfoPartial.cshtml", employee);
+}

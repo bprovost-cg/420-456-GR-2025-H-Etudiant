@@ -1,0 +1,25 @@
+﻿@model PasserInfoVM
+@{
+    ViewData["Title"] = "PasserInfoVM";
+}
+<h2>Avec un dictionnaire</h2>
+<table>
+@foreach(var item in Model.EmployeesPerCountry_dict)
+{
+    <tr>
+            <td>@item.Key</td>
+            <td>@item.Value</td>
+    </tr>
+}
+</table>
+
+<h2>Avec un type "Custom"</h2>
+<table>
+    @foreach (var item in Model.EmployeesPerCountry)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.Count</td>
+        </tr>
+    }
+</table>
