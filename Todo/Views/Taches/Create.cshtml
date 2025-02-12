@@ -1,0 +1,44 @@
+﻿@model TachesCreateViewModel
+
+@{
+    ViewData["Title"] = "Créer une tâche";
+    ViewData["Date"] = DateTimeOffset.Now;
+}
+
+<h1>Créer une nouvelle tâche</h1>
+
+@* <p>@ViewData["indexMessage"]</p>
+<p>@ViewBag.IndexMessage</p>
+<p>@TempData["indexMessage"]</p>
+<p>@ViewData["createMessage"]</p>
+<p>@ViewBag.CreateMessage</p>
+<p>@TempData["createMessage"]</p> *@
+
+<form asp-action="Create" method="post">
+    <div>
+        <label for="Titre">Titre</label>
+        <input id="Titre" name="Titre" type="text" value="@Model?.Titre" />
+        <!-- Affichage des erreurs éventuelles -->
+        <span asp-validation-for="Titre"></span>
+    </div>
+    <div>
+        <label for="Categorie">Catégorie</label>
+        <select asp-for="Categorie">
+            <option selected="selected" value="Aucune" disabled >Choisissez une catégorie</option>
+            <option value="École">École</option>
+            <option value="Famille">Famille</option>
+            <option value="Perso">Perso</option>
+            <option value="Travail">Travail</option>
+        </select>
+        <!-- Affichage des erreurs éventuelles -->
+        <span asp-validation-for="Categorie"></span>
+    </div>
+    <div>
+        <label for="DateLimite">Date Limite</label>
+        <input id="DateLimite" name="Date Limite" type="date" value="@Model?.DateLimite" />
+        <!-- Affichage des erreurs éventuelles -->
+        <span asp-validation-for="DateLimite"></span>
+    </div>
+
+    <button type="submit">Créer</button>
+</form>

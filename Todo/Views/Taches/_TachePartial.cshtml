@@ -1,0 +1,16 @@
+﻿@model TacheIndexViewModel
+<tr class="@(Model.EstCompletee ? "complete" : "")">
+    <td>@Model.Id</td>
+    <td>@Model.Titre</td>
+    <td>@(Model.EstCompletee ? "Oui" : "Non")</td>
+    <td><a href="/Taches/Index?nom_categorie=@Model.Categorie">@Model.Categorie</a></td>
+    <td>@Model.DateLimite</td>
+    <td>@Model.DateCompletion</td>
+    <td>
+        @if (!Model.EstCompletee)
+        {
+            <a href="/Taches/Complete/@Model.Id">Terminer</a>
+        }
+        <a href="/Taches/Delete/@Model.Id">Supprimer</a>
+    </td>
+</tr>

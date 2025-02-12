@@ -1,0 +1,61 @@
+﻿@E2_3_HostAddress = https://localhost:7178
+
+GET {{E2_3_HostAddress}}/employees
+
+###
+
+GET {{E2_3_HostAddress}}/employees/index
+
+###
+
+GET {{E2_3_HostAddress}}/employees/index/2
+
+###
+
+GET {{E2_3_HostAddress}}/employees?id=2
+
+###
+
+GET {{E2_3_HostAddress}}/employees?id=123
+
+###
+
+@name=string
+GET {{E2_3_HostAddress}}/employees/chercher/hUgO
+
+###
+
+@name=string
+GET {{E2_3_HostAddress}}/employees/chercher/Gaétan
+
+###
+
+@name=string
+GET {{E2_3_HostAddress}}/employees/chercher/Paul
+
+###
+
+@annee=string
+@mois=string
+GET {{E2_3_HostAddress}}/employees/embauche/2001/12
+
+###
+
+@propriete=string
+GET {{E2_3_HostAddress}}/employees/moyenne/salaire
+
+###
+
+@propriete=string
+GET {{E2_3_HostAddress}}/employees/moyenne/experience
+
+###
+
+@propriete=string
+GET {{E2_3_HostAddress}}/employees/moyenne/id
+
+###
+
+GET {{E2_3_HostAddress}}/home/error/{id}
+
+###

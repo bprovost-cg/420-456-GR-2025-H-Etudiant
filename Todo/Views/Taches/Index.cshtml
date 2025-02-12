@@ -1,0 +1,43 @@
+﻿@model TachesIndexViewModel
+
+@{
+    ViewData["Title"] = "Liste des tâches";
+}
+
+<p>@ViewData["createMessage"]</p>
+<p>@ViewBag.CreateMessage</p>
+<p>@TempData["createMessage"]</p>
+<p>@ViewData["indexMessage"]</p>
+<p>@ViewBag.IndexMessage</p>
+<p>@TempData["indexMessage"]</p>
+
+@if (Model.Categorie != Categorie.Aucune)
+{
+    <h1>Liste des tâches (@Model.Categorie)</h1>
+    <p><a href="/Taches/Index">Retournez à la liste de tâches complètes</a></p>
+}
+else
+{
+    <h1>Liste des tâches</h1>
+}
+<p><a href="/Taches/Create">Créer une nouvelle tâche</a></p>
+
+<table class="table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Complétée?</th>
+            <th>Catégorie</th>
+            <th>Date Limite</th>
+            <th>Date de complétion</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var tache in Model.Taches)
+        {
+            @await Html.PartialAsync("_TachePartial", tache);
+        }
+    </tbody>
+</table>
