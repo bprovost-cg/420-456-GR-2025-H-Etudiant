@@ -1,0 +1,68 @@
+﻿@* Views/Shared/_Layout.cshtml *@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gestion de Projets</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Gestion de Projets</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Comparaison">Comparaison des méthodes</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Types de chargement
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" asp-controller="EagerLoading" asp-action="DetailsProjet" asp-route-id="1">Chargement immédiat</a>
+                                <a class="dropdown-item" asp-controller="LazyLoading" asp-action="DetailsProjet" asp-route-id="1">Chargement différé</a>
+                                <a class="dropdown-item" asp-controller="ExplicitLoading" asp-action="DetailsProjet" asp-route-id="1">Chargement explicite</a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarExamples" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Exemples spécifiques
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarExamples">
+                                <a class="dropdown-item" asp-controller="EagerLoading" asp-action="TachesHautePriorite" asp-route-projetId="1">Filtrage avec chargement immédiat</a>
+                                <a class="dropdown-item" asp-controller="ExplicitLoading" asp-action="TachesRecentes" asp-route-id="1">Filtrage avec chargement explicite</a>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="PerformanceTest" asp-route-id="1">Test de performance</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - Gestion de Projets - <a asp-area="" asp-controller="Home" asp-action="Privacy">Confidentialité</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,78 @@
+﻿@model Projet
+
+@{
+    ViewData["Title"] = "Tâches Haute Priorité";
+}
+
+<div class="container">
+    <h1 class="mb-4">Tâches prioritaires - @Model.Nom <span class="badge bg-info text-white">Chargement immédiat avec filtrage</span></h1>
+
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            Tâches urgentes et de haute priorité
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Priorité</th>
+                            <th>Statut</th>
+                            <th>Assignée à</th>
+                            <th>Date échéance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tache in Model.Taches.OrderByDescending(t => t.Priorite).ThenBy(t => t.DateEcheance))
+                        {
+                            <tr class="@(tache.Priorite == PrioriteEnum.Urgente ? "table-danger" : "table-warning")">
+                                <td>@tache.Titre</td>
+                                <td>
+                                    @switch (tache.Priorite)
+                                    {
+                                        case PrioriteEnum.Urgente:
+                                            <span class="badge bg-danger">Urgente</span>
+                                            break;
+                                        case PrioriteEnum.Haute:
+                                            <span class="badge bg-warning text-dark">Haute</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @switch (tache.Statut)
+                                    {
+                                        case StatutEnum.NonCommencee:
+                                            <span class="badge bg-secondary">Non commencée</span>
+                                            break;
+                                        case StatutEnum.EnCours:
+                                            <span class="badge bg-primary">En cours</span>
+                                            break;
+                                        case StatutEnum.EnAttente:
+                                            <span class="badge bg-warning text-dark">En attente</span>
+                                            break;
+                                        case StatutEnum.Terminee:
+                                            <span class="badge bg-success">Terminée</span>
+                                            break;
+                                        case StatutEnum.Annulee:
+                                            <span class="badge bg-danger">Annulée</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@(tache.EmployeAssigne?.Prenom ?? "") @(tache.EmployeAssigne?.Nom ?? "Non assignée")</td>
+                                <td>@(tache.DateEcheance?.ToShortDateString() ?? "Non définie")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <p class="text-muted mb-0"><small>Note: Ces données ont été filtrées directement dans la requête SQL grâce à la méthode .Where() avec Include()</small></p>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="DetailsProjet" asp-route-id="@Model.Id" class="btn btn-outline-primary">Retour aux détails complets</a>
+    </div>
+</div>

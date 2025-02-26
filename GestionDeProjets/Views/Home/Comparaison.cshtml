@@ -1,0 +1,301 @@
+﻿@{
+    ViewData["Title"] = "Comparaison des méthodes de chargement";
+}
+
+<div class="container">
+    <h1 class="mb-4">Comparaison des méthodes de chargement Entity Framework Core</h1>
+
+    <div class="alert alert-info">
+        <p>Cette page permet de comparer les différents types de chargement dans Entity Framework Core et de visualiser leurs différences en termes de requêtes SQL générées et de performance.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    Chargement immédiat (Eager Loading)
+                </div>
+                <div class="card-body">
+                    <h5>Caractéristiques</h5>
+                    <ul>
+                        <li>Utilise <code>.Include()</code> et <code>.ThenInclude()</code></li>
+                        <li>Une seule requête SQL</li>
+                        <li>Charge toutes les données associées en même temps</li>
+                    </ul>
+
+                    <h5>Code</h5>
+                    <pre><code class="language-csharp">var projet = await _context.Projets
+    .Include(p => p.Taches)
+        .ThenInclude(t => t.EmployeAssigne)
+    .Include(p => p.Membres)
+        .ThenInclude(m => m.Employe)
+    .FirstOrDefaultAsync(p => p.Id == id);</code></pre>
+
+                    <h5>Avantages</h5>
+                    <ul>
+                        <li>Efficace pour les requêtes réseau (une seule requête)</li>
+                        <li>Données disponibles immédiatement</li>
+                        <li>Évite le problème N+1</li>
+                    </ul>
+
+                    <h5>Inconvénients</h5>
+                    <ul>
+                        <li>Peut charger trop de données non nécessaires</li>
+                        <li>Requêtes SQL potentiellement complexes</li>
+                        <li>Risque de problèmes de mémoire pour de grands ensembles de données</li>
+                    </ul>
+
+                    <div class="mt-3">
+                        <a href="/EagerLoading/DetailsProjet/1" class="btn btn-primary btn-block">Voir un exemple</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    Chargement différé (Lazy Loading)
+                </div>
+                <div class="card-body">
+                    <h5>Caractéristiques</h5>
+                    <ul>
+                        <li>Propriétés de navigation <code>virtual</code></li>
+                        <li>Utilise <code>UseLazyLoadingProxies()</code></li>
+                        <li>Charge les données quand on y accède</li>
+                    </ul>
+
+                    <h5>Code</h5>
+                    <pre><code class="language-csharp">// Configuration
+services.AddDbContext&lt;GestionProjetsContext&gt;(options => 
+    options.UseLazyLoadingProxies()
+           .UseSqlServer(connectionString));
+
+// Modèle
+public class Projet
+{
+    public virtual ICollection&lt;Tache&gt; Taches { get; set; }
+}
+
+// Utilisation
+var projet = await _context.Projets
+    .FirstOrDefaultAsync(p => p.Id == id);
+// Accès automatique quand nécessaire
+var taches = projet.Taches; // Déclenche une requête</code></pre>
+
+                    <h5>Avantages</h5>
+                    <ul>
+                        <li>Simple à utiliser</li>
+                        <li>Charge uniquement ce qui est nécessaire</li>
+                        <li>Développement plus rapide</li>
+                    </ul>
+
+                    <h5>Inconvénients</h5>
+                    <ul>
+                        <li>Problème N+1 (trop de requêtes)</li>
+                        <li>Performance réseau réduite</li>
+                        <li>Difficile à déboguer</li>
+                    </ul>
+
+                    <div class="mt-3">
+                        <a href="/LazyLoading/DetailsProjet/1" class="btn btn-warning btn-block">Voir un exemple</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    Chargement explicite (Explicit Loading)
+                </div>
+                <div class="card-body">
+                    <h5>Caractéristiques</h5>
+                    <ul>
+                        <li>Utilise <code>.Entry()</code>, <code>.Collection()</code>, <code>.Reference()</code></li>
+                        <li>Chargement manuel des entités associées</li>
+                        <li>Possibilité de filtrer avec <code>.Query().Where()</code></li>
+                    </ul>
+
+                    <h5>Code</h5>
+                    <pre><code class="language-csharp">var projet = await _context.Projets
+    .FirstOrDefaultAsync(p => p.Id == id);
+
+// Charger toutes les tâches
+await _context.Entry(projet)
+    .Collection(p => p.Taches)
+    .LoadAsync();
+
+// Charger avec filtrage
+await _context.Entry(projet)
+    .Collection(p => p.Taches)
+    .Query()
+    .Where(t => t.Priorite == PrioriteEnum.Haute)
+    .LoadAsync();</code></pre>
+
+                    <h5>Avantages</h5>
+                    <ul>
+                        <li>Contrôle précis sur ce qui est chargé</li>
+                        <li>Possibilité de filtrer les données associées</li>
+                        <li>Flexibilité</li>
+                    </ul>
+
+                    <h5>Inconvénients</h5>
+                    <ul>
+                        <li>Plus verbeux, plus de code</li>
+                        <li>Plusieurs requêtes SQL</li>
+                        <li>Développement plus lent</li>
+                    </ul>
+
+                    <div class="mt-3">
+                        <a href="/ExplicitLoading/DetailsProjet/1" class="btn btn-primary btn-block">Voir un exemple</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            Comparaison des requêtes SQL générées
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Type de chargement</th>
+                            <th>Nombre de requêtes</th>
+                            <th>Exemple de requête SQL générée</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Chargement immédiat</td>
+                            <td><strong>1 requête</strong></td>
+                            <td>
+                                <pre><code class="language-sql">SELECT p.Id, p.Nom, p.Description, ...
+FROM Projets p
+LEFT JOIN Taches t ON p.Id = t.ProjetId
+LEFT JOIN Employes e ON t.EmployeId = e.Id
+LEFT JOIN MembresProjet mp ON p.Id = mp.ProjetId
+LEFT JOIN Employes e2 ON mp.EmployeId = e2.Id
+WHERE p.Id = 1</code></pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Chargement différé</td>
+                            <td><strong>1 + N + M requêtes</strong><br>(où N = nombre de tâches, M = nombre de membres)</td>
+                            <td>
+                                <pre><code class="language-sql">-- Requête 1
+SELECT * FROM Projets WHERE Id = 1
+
+-- Requête 2 (déclenchée quand on accède à projet.Taches)
+SELECT * FROM Taches WHERE ProjetId = 1
+
+-- Requête 3 (déclenchée quand on accède à tache.EmployeAssigne)
+SELECT * FROM Employes WHERE Id = 5
+
+-- Requête 4 (déclenchée quand on accède à projet.Membres)
+SELECT * FROM MembresProjet WHERE ProjetId = 1
+
+-- Requête 5 (déclenchée quand on accède à membre.Employe)
+SELECT * FROM Employes WHERE Id = 3
+
+-- ... et ainsi de suite pour chaque accès à une propriété de navigation</code></pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Chargement explicite</td>
+                            <td><strong>1 + X requêtes</strong><br>(où X = nombre de collections/références chargées explicitement)</td>
+                            <td>
+                                <pre><code class="language-sql">-- Requête 1
+SELECT * FROM Projets WHERE Id = 1
+
+-- Requête 2 (chargement explicite des tâches)
+SELECT * FROM Taches WHERE ProjetId = 1
+
+-- Requête 3 (chargement explicite des membres)
+SELECT * FROM MembresProjet WHERE ProjetId = 1
+
+-- Requête 4 (chargement explicite des employés pour les tâches)
+SELECT * FROM Employes WHERE Id IN (5, 8, 12)
+
+-- Requête 5 (chargement explicite des employés pour les membres)
+SELECT * FROM Employes WHERE Id IN (3, 7, 9)</code></pre>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            Recommandations d'utilisation
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Quand utiliser le chargement immédiat
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Lorsque vous savez à l'avance que vous aurez besoin de toutes les données associées</li>
+                                <li>Pour les vues qui affichent des détails complets</li>
+                                <li>Pour éviter le problème N+1 dans des listes avec relations</li>
+                                <li>Quand la performance réseau est plus importante que la performance mémoire</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            Quand utiliser le chargement différé
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Pour du développement rapide en phase de prototypage</li>
+                                <li>Quand vous n'êtes pas sûr des données dont vous aurez besoin</li>
+                                <li>Pour des applications avec peu d'utilisateurs simultanés</li>
+                                <li>Quand les entités associées sont rarement consultées</li>
+                                <li>Pour des applications où la performance n'est pas critique</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            Quand utiliser le chargement explicite
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Quand vous avez besoin d'un contrôle précis sur les données chargées</li>
+                                <li>Pour charger des sous-ensembles filtrés de collections (par ex. uniquement les tâches récentes)</li>
+                                <li>Pour les applications avec beaucoup de données et de nombreux utilisateurs</li>
+                                <li>Quand vous devez optimiser la performance au maximum</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Pour mettre en évidence la syntaxe dans les exemples de code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Si vous avez une bibliothèque de mise en évidence de la syntaxe comme highlight.js
+            // highlight.initHighlighting();
+        });
+    </script>
+}

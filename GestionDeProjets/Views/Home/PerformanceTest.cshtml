@@ -1,0 +1,192 @@
+﻿@* Views/Home/PerformanceTest.cshtml *@
+@model List<PerformanceComparisonService.PerformanceResult>
+@{
+    ViewData["Title"] = "Résultats des tests de performance";
+}
+
+<div class="container">
+    <h1 class="mb-4">Résultats des tests de performance</h1>
+
+    <div class="alert alert-info mb-4">
+        <p class="mb-0">Ces tests comparent les performances des trois types de chargement dans Entity Framework Core en chargeant un projet avec ses tâches et ses membres associés.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Comparaison des temps d'exécution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Résumé</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var fastestMethod = Model.Where(r => r.TimeInMilliseconds > 0).OrderBy(r => r.TimeInMilliseconds).FirstOrDefault();
+                        var slowestMethod = Model.Where(r => r.TimeInMilliseconds > 0).OrderByDescending(r => r.TimeInMilliseconds).FirstOrDefault();
+                    }
+
+                    @if (fastestMethod != null)
+                    {
+                        <p><strong>Méthode la plus rapide:</strong> @fastestMethod.Method (@fastestMethod.TimeInMilliseconds ms)</p>
+                    }
+
+                    @if (slowestMethod != null)
+                    {
+                        <p><strong>Méthode la plus lente:</strong> @slowestMethod.Method (@slowestMethod.TimeInMilliseconds ms)</p>
+
+                        @if (fastestMethod != null && fastestMethod.TimeInMilliseconds > 0 && slowestMethod.TimeInMilliseconds > 0)
+                        {
+                            var difference = slowestMethod.TimeInMilliseconds - fastestMethod.TimeInMilliseconds;
+                            var ratio = (double)slowestMethod.TimeInMilliseconds / fastestMethod.TimeInMilliseconds;
+
+                            <p><strong>Différence:</strong> @difference ms (@Math.Round(ratio, 1)x plus lent)</p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Résultats détaillés</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Méthode de chargement</th>
+                            <th>Temps d'exécution</th>
+                            <th>Entités chargées</th>
+                            <th>Estimation requêtes SQL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var result in Model.OrderBy(r => r.TimeInMilliseconds > 0 ? r.TimeInMilliseconds : int.MaxValue))
+                        {
+                            <tr>
+                                <td>@result.Method</td>
+                                <td>
+                                    @if (result.TimeInMilliseconds >= 0)
+                                    {
+                                        <span class="@(result == fastestMethod ? "text-success font-weight-bold" : result == slowestMethod ? "text-danger" : "")">
+                                            @result.TimeInMilliseconds ms
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Non disponible</span>
+                                    }
+                                </td>
+                                <td>@result.EntitiesLoaded</td>
+                                <td>@result.EstimatedQueryCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Analyse des résultats</h5>
+        </div>
+        <div class="card-body">
+            <h5>Chargement immédiat (Eager Loading)</h5>
+            <ul>
+                <li>Génère une seule requête SQL complexe</li>
+                <li>Idéal quand vous savez à l'avance que vous aurez besoin de toutes les entités associées</li>
+                <li>Avantage: Moins de requêtes SQL (meilleure performance réseau)</li>
+                <li>Inconvénient: Peut charger trop de données inutiles</li>
+            </ul>
+
+            <h5>Chargement explicite (Explicit Loading)</h5>
+            <ul>
+                <li>Permet de charger manuellement les données associées quand nécessaire</li>
+                <li>Génère plusieurs requêtes SQL distinctes</li>
+                <li>Avantage: Contrôle précis sur ce qui est chargé</li>
+                <li>Inconvénient: Nécessite plus de code, plusieurs allers-retours vers la base de données</li>
+            </ul>
+
+            <h5>Chargement différé (Lazy Loading)</h5>
+            <ul>
+                <li>Charge automatiquement les données associées lorsqu'on y accède</li>
+                <li>Génère de nombreuses requêtes SQL individuelles (problème N+1)</li>
+                <li>Avantage: Simple à utiliser, développement rapide</li>
+                <li>Inconvénient: Risque de performances catastrophiques pour de grands ensembles de données</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="javascript:history.back()" class="btn btn-outline-primary">Retour</a>
+        <a asp-action="PerformanceTest" asp-route-id="1" class="btn btn-outline-success ml-2">Relancer le test</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('performanceChart').getContext('2d');
+
+            var methodLabels = @Json.Serialize(Model.Select(r => r.Method).ToArray());
+            var timeData = @Json.Serialize(Model.Select(r => r.TimeInMilliseconds).ToArray());
+
+            // Définir des couleurs pour chaque type de chargement
+            var backgroundColors = [
+                'rgba(54, 162, 235, 0.5)', // Bleu pour Eager
+                'rgba(255, 159, 64, 0.5)', // Orange pour Explicit
+                'rgba(75, 192, 192, 0.5)'  // Vert pour Lazy
+            ];
+
+            var borderColors = [
+                'rgb(54, 162, 235)',
+                'rgb(255, 159, 64)',
+                'rgb(75, 192, 192)'
+            ];
+
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: methodLabels,
+                    datasets: [{
+                        label: 'Temps d\'exécution (ms)',
+                        data: timeData,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Millisecondes'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Comparaison des temps d\'exécution par type de chargement'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

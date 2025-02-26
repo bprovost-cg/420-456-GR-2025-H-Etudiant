@@ -1,0 +1,195 @@
+﻿@model Projet
+@{
+    ViewData["Title"] = "Détails du projet (Chargement immédiat)";
+}
+
+<div class="container">
+    <h1 class="mb-4">@Model.Nom <span class="badge bg-info text-white">Chargement immédiat</span></h1>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Informations générales
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Description:</strong> @Model.Description</p>
+                            <p><strong>Budget:</strong> @Model.Budget.ToString("C")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date de début:</strong> @Model.DateDebut.ToShortDateString()</p>
+                            <p><strong>Date de fin prévue:</strong> @(Model.DateFin?.ToShortDateString() ?? "Non définie")</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Toutes les données ont été chargées en une seule requête SQL avec Include() et ThenInclude()</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    Statistiques
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre de tâches:</strong> @Model.Taches.Count</p>
+                    <p><strong>Tâches terminées:</strong> @Model.Taches.Count(t => t.Statut == StatutEnum.Terminee)</p>
+                    <p><strong>Membres de l'équipe:</strong> @Model.Membres.Count</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    Membres de l'équipe
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Poste</th>
+                                    <th>Email</th>
+                                    <th>Rôle dans le projet</th>
+                                    <th>Date d'ajout</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var membre in Model.Membres.OrderBy(m => m.Employe.Nom))
+                                {
+                                    <tr>
+                                        <td>@membre.Employe.Prenom @membre.Employe.Nom</td>
+                                        <td>@membre.Employe.Poste</td>
+                                        <td>@membre.Employe.Email</td>
+                                        <td>@membre.Role</td>
+                                        <td>@membre.DateAjout.ToShortDateString()</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <span>Tâches du projet</span>
+                    <a asp-action="TachesHautePriorite" asp-route-projetId="@Model.Id" class="btn btn-sm btn-danger">Tâches prioritaires</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Priorité</th>
+                                    <th>Statut</th>
+                                    <th>Assignée à</th>
+                                    <th>Date échéance</th>
+                                    <th>Commentaires</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tache in Model.Taches.OrderByDescending(t => t.Priorite).ThenBy(t => t.DateEcheance))
+                                {
+                                    <tr class="@(tache.Priorite == PrioriteEnum.Urgente ? "table-danger" : tache.Priorite == PrioriteEnum.Haute ? "table-warning" : "")">
+                                        <td>@tache.Titre</td>
+                                        <td>
+                                            @switch (tache.Priorite)
+                                            {
+                                                case PrioriteEnum.Urgente:
+                                                    <span class="badge bg-danger">Urgente</span>
+                                                    break;
+                                                case PrioriteEnum.Haute:
+                                                    <span class="badge bg-warning text-dark">Haute</span>
+                                                    break;
+                                                case PrioriteEnum.Moyenne:
+                                                    <span class="badge bg-primary">Moyenne</span>
+                                                    break;
+                                                case PrioriteEnum.Basse:
+                                                    <span class="badge bg-info">Basse</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @switch (tache.Statut)
+                                            {
+                                                case StatutEnum.NonCommencee:
+                                                    <span class="badge bg-secondary">Non commencée</span>
+                                                    break;
+                                                case StatutEnum.EnCours:
+                                                    <span class="badge bg-primary">En cours</span>
+                                                    break;
+                                                case StatutEnum.EnAttente:
+                                                    <span class="badge bg-warning text-dark">En attente</span>
+                                                    break;
+                                                case StatutEnum.Terminee:
+                                                    <span class="badge bg-success">Terminée</span>
+                                                    break;
+                                                case StatutEnum.Annulee:
+                                                    <span class="badge bg-danger">Annulée</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>@(tache.EmployeAssigne?.Prenom ?? "") @(tache.EmployeAssigne?.Nom ?? "Non assignée")</td>
+                                        <td>@(tache.DateEcheance?.ToShortDateString() ?? "Non définie")</td>
+                                        <td>
+                                            @if (tache.Commentaires?.Any() == true)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#commentsModal-@tache.Id">
+                                                    @tache.Commentaires.Count commentaire(s)
+                                                </button>
+
+                                                <div class="modal fade" id="commentsModal-@tache.Id" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel-@tache.Id" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="commentsModalLabel-@tache.Id">Commentaires - @tache.Titre</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                @foreach (var commentaire in tache.Commentaires.OrderByDescending(c => c.DateCreation))
+                                                                {
+                                                                    <div class="card mb-2">
+                                                                        <div class="card-header d-flex justify-content-between">
+                                                                            <span>@commentaire.Employe.Prenom @commentaire.Employe.Nom</span>
+                                                                            <small>@commentaire.DateCreation.ToString("g")</small>
+                                                                        </div>
+                                                                        <div class="card-body">
+                                                                            <p class="card-text">@commentaire.Contenu</p>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span>Aucun</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

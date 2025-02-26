@@ -1,0 +1,160 @@
+﻿@model Projet
+
+@{
+    ViewData["Title"] = "Détails du projet (Chargement différé)";
+}
+
+<div class="container">
+    <h1 class="mb-4">@Model.Nom <span class="badge bg-warning text-dark">Chargement différé</span></h1>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Informations générales
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Description:</strong> @Model.Description</p>
+                            <p><strong>Budget:</strong> @Model.Budget.ToString("C")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date de début:</strong> @Model.DateDebut.ToShortDateString()</p>
+                            <p><strong>Date de fin prévue:</strong> @(Model.DateFin?.ToShortDateString() ?? "Non définie")</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Les données associées seront chargées automatiquement lors de l'accès (déclenche de multiples requêtes SQL)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    Statistiques
+                </div>
+                <div class="card-body">
+                    @* Chaque accès aux collections ci-dessous déclenche une requête SQL *@
+                    <p><strong>Nombre de tâches:</strong> @Model.Taches.Count</p>
+                    <p><strong>Tâches terminées:</strong> @Model.Taches.Count(t => t.Statut == StatutEnum.Terminee)</p>
+                    <p><strong>Membres de l'équipe:</strong> @Model.Membres.Count</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    Membres de l'équipe
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Poste</th>
+                                    <th>Email</th>
+                                    <th>Rôle dans le projet</th>
+                                    <th>Date d'ajout</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* L'accès à Model.Membres déclenche une requête SQL *@
+                                @* Pour chaque membre, l'accès à Employe déclenche une requête SQL (problème N+1) *@
+                                @foreach (var membre in Model.Membres.OrderBy(m => m.Employe.Nom))
+                                {
+                                    <tr>
+                                        <td>@membre.Employe.Prenom @membre.Employe.Nom</td>
+                                        <td>@membre.Employe.Poste</td>
+                                        <td>@membre.Employe.Email</td>
+                                        <td>@membre.Role</td>
+                                        <td>@membre.DateAjout.ToShortDateString()</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <span>Tâches du projet</span>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> Cette page utilise le chargement différé (lazy loading). Chaque accès à une propriété de navigation déclenche une requête SQL. Observez les logs dans la console pour voir toutes les requêtes générées.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Priorité</th>
+                                    <th>Statut</th>
+                                    <th>Assignée à</th>
+                                    <th>Date échéance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* L'accès à Model.Taches déclenche une requête SQL *@
+                                @* Pour chaque tâche, l'accès à EmployeAssigne déclenche une requête SQL (problème N+1) *@
+                                @foreach (var tache in Model.Taches.OrderByDescending(t => t.Priorite).ThenBy(t => t.DateEcheance))
+                                {
+                                    <tr class="@(tache.Priorite == PrioriteEnum.Urgente ? "table-danger" : tache.Priorite == PrioriteEnum.Haute ? "table-warning" : "")">
+                                        <td>@tache.Titre</td>
+                                        <td>
+                                            @switch (tache.Priorite)
+                                            {
+                                                case PrioriteEnum.Urgente:
+                                                    <span class="badge bg-danger">Urgente</span>
+                                                    break;
+                                                case PrioriteEnum.Haute:
+                                                    <span class="badge bg-warning text-dark">Haute</span>
+                                                    break;
+                                                case PrioriteEnum.Moyenne:
+                                                    <span class="badge bg-primary">Moyenne</span>
+                                                    break;
+                                                case PrioriteEnum.Basse:
+                                                    <span class="badge bg-info">Basse</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @switch (tache.Statut)
+                                            {
+                                                case StatutEnum.NonCommencee:
+                                                    <span class="badge bg-secondary">Non commencée</span>
+                                                    break;
+                                                case StatutEnum.EnCours:
+                                                    <span class="badge bg-primary">En cours</span>
+                                                    break;
+                                                case StatutEnum.EnAttente:
+                                                    <span class="badge bg-warning text-dark">En attente</span>
+                                                    break;
+                                                case StatutEnum.Terminee:
+                                                    <span class="badge bg-success">Terminée</span>
+                                                    break;
+                                                case StatutEnum.Annulee:
+                                                    <span class="badge bg-danger">Annulée</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>@(tache.EmployeAssigne?.Prenom ?? "") @(tache.EmployeAssigne?.Nom ?? "Non assignée")</td>
+                                        <td>@(tache.DateEcheance?.ToShortDateString() ?? "Non définie")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

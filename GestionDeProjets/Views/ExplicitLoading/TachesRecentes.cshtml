@@ -1,0 +1,95 @@
+﻿@model Projet
+
+@{
+    ViewData["Title"] = "Tâches récentes";
+}
+
+<div class="container">
+    <h1 class="mb-4">Tâches récentes - @Model.Nom <span class="badge bg-info text-white">Chargement explicite avec filtrage</span></h1>
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            Tâches créées au cours des 7 derniers jours
+        </div>
+        <div class="card-body">
+            @if (Model.Taches.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Priorité</th>
+                                <th>Statut</th>
+                                <th>Assignée à</th>
+                                <th>Date création</th>
+                                <th>Date échéance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tache in Model.Taches.OrderByDescending(t => t.DateCreation))
+                            {
+                                <tr>
+                                    <td>@tache.Titre</td>
+                                    <td>
+                                        @switch (tache.Priorite)
+                                        {
+                                            case PrioriteEnum.Urgente:
+                                                <span class="badge bg-danger">Urgente</span>
+                                                break;
+                                            case PrioriteEnum.Haute:
+                                                <span class="badge bg-warning text-dark">Haute</span>
+                                                break;
+                                            case PrioriteEnum.Moyenne:
+                                                <span class="badge bg-primary">Moyenne</span>
+                                                break;
+                                            case PrioriteEnum.Basse:
+                                                <span class="badge bg-info">Basse</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (tache.Statut)
+                                        {
+                                            case StatutEnum.NonCommencee:
+                                                <span class="badge bg-secondary">Non commencée</span>
+                                                break;
+                                            case StatutEnum.EnCours:
+                                                <span class="badge bg-primary">En cours</span>
+                                                break;
+                                            case StatutEnum.EnAttente:
+                                                <span class="badge bg-warning text-dark">En attente</span>
+                                                break;
+                                            case StatutEnum.Terminee:
+                                                <span class="badge bg-success">Terminée</span>
+                                                break;
+                                            case StatutEnum.Annulee:
+                                                <span class="badge bg-danger">Annulée</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>@(tache.EmployeAssigne?.Prenom ?? "") @(tache.EmployeAssigne?.Nom ?? "Non assignée")</td>
+                                    <td>@tache.DateCreation.ToString("g")</td>
+                                    <td>@(tache.DateEcheance?.ToShortDateString() ?? "Non définie")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary">
+                    <p class="mb-0">Aucune tâche n'a été créée au cours des 7 derniers jours.</p>
+                </div>
+            }
+        </div>
+        <div class="card-footer">
+            <p class="text-muted mb-0"><small>Note: Ces données ont été filtrées avec la méthode .Query().Where() du chargement explicite</small></p>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="DetailsProjet" asp-route-id="@Model.Id" class="btn btn-outline-primary">Retour aux détails complets</a>
+    </div>
+</div>

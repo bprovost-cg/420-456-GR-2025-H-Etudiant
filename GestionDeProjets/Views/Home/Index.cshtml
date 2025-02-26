@@ -1,0 +1,83 @@
+﻿@* Views/Home/Index.cshtml *@
+@{
+    ViewData["Title"] = "Accueil";
+}
+
+<div class="container">
+    <div class="jumbotron">
+        <h1 class="display-4">Gestion de Projets</h1>
+        <p class="lead">Démonstration des types de chargement dans Entity Framework Core</p>
+        <hr class="my-4">
+        <p>Ce projet illustre les trois principaux types de chargement dans Entity Framework Core : immédiat (eager), différé (lazy) et explicite (explicit).</p>
+        <a class="btn btn-primary btn-lg" asp-controller="Home" asp-action="Comparaison" role="button">Comparer les méthodes</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Chargement immédiat</h5>
+                </div>
+                <div class="card-body">
+                    <p>Utilise <code>.Include()</code> et <code>.ThenInclude()</code> pour charger toutes les données associées en une seule requête.</p>
+                    <a asp-controller="EagerLoading" asp-action="DetailsProjet" asp-route-id="1" class="btn btn-outline-info">Voir l'exemple</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Chargement différé</h5>
+                </div>
+                <div class="card-body">
+                    <p>Utilise des propriétés de navigation <code>virtual</code> pour charger automatiquement les données lors de l'accès.</p>
+                    <a asp-controller="LazyLoading" asp-action="DetailsProjet" asp-route-id="1" class="btn btn-outline-warning">Voir l'exemple</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Chargement explicite</h5>
+                </div>
+                <div class="card-body">
+                    <p>Utilise <code>.Entry()</code>, <code>.Collection()</code> et <code>.Load()</code> pour charger manuellement les données.</p>
+                    <a asp-controller="ExplicitLoading" asp-action="DetailsProjet" asp-route-id="1" class="btn btn-outline-primary">Voir l'exemple</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Exemples spécifiques</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <a asp-controller="EagerLoading" asp-action="TachesHautePriorite" asp-route-projetId="1" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Filtrage avec chargement immédiat</h5>
+                        <small class="text-info">Include().Where()</small>
+                    </div>
+                    <p class="mb-1">Utilisation de filtres avec le chargement immédiat pour charger uniquement les tâches de haute priorité.</p>
+                </a>
+                <a asp-controller="ExplicitLoading" asp-action="TachesRecentes" asp-route-id="1" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Filtrage avec chargement explicite</h5>
+                        <small class="text-primary">Entry().Collection().Query().Where()</small>
+                    </div>
+                    <p class="mb-1">Utilisation de filtres avec le chargement explicite pour charger uniquement les tâches récentes.</p>
+                </a>
+                <a asp-controller="Home" asp-action="PerformanceTest" asp-route-id="1" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Test de performance</h5>
+                        <small class="text-success">Comparaison des temps d'exécution</small>
+                    </div>
+                    <p class="mb-1">Exécution d'un test qui compare les performances des différents types de chargement.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
