@@ -11,7 +11,7 @@ namespace Exercice_Formulaire_Etudiant.Controllers
     {
         public IActionResult Index()
         {
-            return View(new HomeVM());
+            return View();
         }
 
         public IActionResult Privacy()
