@@ -5,15 +5,7 @@ using System.Globalization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-if (builder.Environment.IsDevelopment())
-{
-    // Ajouter le RazorRuntimeCompilation seulement lorsqu'on est en mode développement
-    //builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
-}
-else
-{
-    builder.Services.AddControllersWithViews();
-}
+builder.Services.AddControllersWithViews();
 
 CultureInfo ci = new("fr-CA");
 CultureInfo.DefaultThreadCurrentCulture = ci;
