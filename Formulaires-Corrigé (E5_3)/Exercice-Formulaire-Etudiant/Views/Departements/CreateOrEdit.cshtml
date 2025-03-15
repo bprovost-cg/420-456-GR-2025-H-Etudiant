@@ -1,0 +1,44 @@
+﻿@model FormulaireDepartementVM
+
+@{
+	ViewData["Title"] = Model.Id == 0 ? "Créer" : "Édition";
+}
+
+@if (Model.Id == 0)
+{
+	<h1>Créer un nouveau département</h1>
+}
+else
+{
+	<h1>Édition du département @Model.Nom</h1>
+}
+
+
+<h4>Département</h4>
+<hr />
+
+<form asp-action="Save">
+	<input type="hidden" asp-for="Id" />
+	@* <div asp-validation-summary="ModelOnly" class="invalid-feedback"></div> *@
+	<div class="mb-3">
+		<label asp-for="Nom" class="form-label"></label>
+		<input asp-for="Nom" class="form-control" />
+		@* <span asp-validation-for="Nom" class="invalid-feedback"></span> *@
+	</div>
+	<div class="mb-3">
+		<label asp-for="Budget" class="form-label"></label>
+		<input asp-for="Budget" class="form-control" />
+		@* <span asp-validation-for="Budget" class="invalid-feedback"></span> *@
+	</div>
+	<button type="submit" class="btn btn-primary">@(Model.Id == 0 ? "Créer" : "Modifier")</button>
+</form>
+
+<div>
+	<a asp-action="Index" asp-controller="Home">Retour</a>
+</div>
+
+@* @section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+} *@

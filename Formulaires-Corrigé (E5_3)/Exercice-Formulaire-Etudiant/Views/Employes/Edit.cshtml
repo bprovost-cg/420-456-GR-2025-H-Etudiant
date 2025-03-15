@@ -1,0 +1,49 @@
+﻿@using Exercice_Formulaire_Etudiant.Models
+@model EmployesEditViewModel
+
+<h1>Formulaire de modification d'un employé</h1>
+<hr />
+<br />
+<form asp-action="Edit">
+	<fieldset>
+		<div class="mb-3">
+			<label asp-for="Nom" class="form-label"></label>
+			<input asp-for="Nom" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="Age" class="form-label"></label>
+			<input asp-for="Age" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="DateEmbauche" class="form-label"></label>
+			<input asp-for="DateEmbauche" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="SalaireAnnuel" class="form-label"></label>
+			<input asp-for="SalaireAnnuel" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="Statut" class="form-label"></label>
+			<select asp-for="Statut" asp-items="Html.GetEnumSelectList<StatutEmploye>()" class="form-select">
+				<option selected="selected" value="">Choisissez un statut</option>
+			</select>
+		</div>
+		<div class="mb-3">
+			<label asp-for="TypeRemuneration" class="form-label"></label>
+			@Html.DropDownList("TypeRemuneration", Html.GetEnumSelectList<TypeRemuneration>(), new { @class="form-select"})
+		</div>
+		<div class="mb-3">
+			<label asp-for="PaysId" class="form-label"></label>
+			@* <input asp-for="PaysId" class="form-control" /> *@
+			<select asp-for="PaysId" asp-items="Model.ListePays" class="form-control"></select>
+		</div>
+		<div class="mb-3">
+			<label asp-for="DepartementId" class="form-label"></label>
+			@* <input asp-for="DepartementId" class="form-control" /> *@
+			<select asp-for="DepartementId" asp-items="Model.ListeDepartement" class="form-control"></select>
+
+		</div>
+		<button type="submit" class="btn btn-primary">Modifier</button>
+	</fieldset>
+</form>
+@Html.ActionLink("Retour", "Index", "Home")

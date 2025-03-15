@@ -1,0 +1,41 @@
+﻿@model EmployesCreateViewModel
+
+<h1>Formulaire de création d'un employé</h1>
+<hr />
+<br />
+<form asp-action="Create">
+	<fieldset>
+		@* <legend>Création d'un employé</legend> *@
+		<div class="mb-3">
+			<label asp-for="Nom" class="form-label"></label>
+			<input asp-for="Nom" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="Age" class="form-label"></label>
+			<input asp-for="Age" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="DateEmbauche" class="form-label"></label>
+			<input asp-for="DateEmbauche" class="form-control" />
+			@* <input asp-for="DateEmbauche" type="date" class="form-control" /> *@
+		</div>
+		<div class="mb-3">
+			<label asp-for="SalaireAnnuel" class="form-label"></label>
+			<input asp-for="SalaireAnnuel" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<input asp-for="EstEnEmploi" class="form-check-input" />
+			<label asp-for="EstEnEmploi" class="form-check-label"></label>
+		</div>
+		<div class="mb-3">
+			<label asp-for="PaysId" class="form-label"></label>
+			<input asp-for="PaysId" class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="DepartementId" class="form-label"></label>
+			<input asp-for="DepartementId" class="form-control" />
+		</div>
+		<button type="submit" class="btn btn-primary">Créer</button>
+	</fieldset>
+</form>
+@Html.ActionLink("Retour", "Index", "Home")
